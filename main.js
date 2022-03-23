@@ -1,10 +1,14 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
+const si = require('systeminformation');
+
+let i = 0;
+let mainWindow;
 
 function createWindow () {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -16,7 +20,18 @@ function createWindow () {
   mainWindow.loadFile('index.html')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+}
+
+function pollCPU() {
+  console.log("timer:" + i++);
+
+  si.currentLoad()
+  .then(data => {
+    mainWindow.webContents.send('update-cpu', data);
+  })
+  .catch(error => console.error(error));
+
 }
 
 // This method will be called when Electron has finished
@@ -24,6 +39,8 @@ function createWindow () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
+
+  let timerId = setInterval(() => pollCPU(), 2000);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

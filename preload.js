@@ -1,4 +1,8 @@
-const si = require('systeminformation');
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  handleCPU: (callback) => ipcRenderer.on('update-cpu', callback)
+})
 
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.
@@ -13,12 +17,5 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  si.mem()
-  .then(data => {
-    console.log(data)
-    const element = document.getElementById('systeminfo')
-    if (element) element.innerText = JSON.stringify(data, null, 2);
-  })
-  .catch(error => console.error(error));
 
 })
