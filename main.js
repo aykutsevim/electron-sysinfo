@@ -40,7 +40,7 @@ function pollCPU() {
 app.whenReady().then(() => {
   createWindow()
 
-  let timerId = setInterval(() => pollCPU(), 2000);
+  let timerId = setInterval(() => pollCPU(), 1000);
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

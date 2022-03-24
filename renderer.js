@@ -67,17 +67,20 @@ const counter = document.getElementById('systeminfo')
 
 let cpuViews = [];
 
-function createCPUViews(coreCount){
-  for (let i = 0; i < coreCount; i++){
+function createCPUViews(){
+  const group = new THREE.Group();
+
+  for (let i = 0; i < cpuLoadQueues.length; i++){
     let cpuView = [];
 
-    for (let j = 0; j < coreCount; j++){
-      const geometry = new THREE.BoxGeometry( 20, 20, 20 );
+    for (let j = 0; j < cpuLoadQueues[i].length; j++){
+      const geometry = new THREE.BoxGeometry( 10, 10, 10 );
       const material = new THREE.MeshBasicMaterial( { map: texture } );
       const cube = new THREE.Mesh( geometry, material );
-      cube.translateX((i-10) * 40);
-      cube.translateY((j-10) * 40);
-      scene.add( cube );
+      cube.translateX((i-10) * 12);
+      cube.translateY((j-6) * 12);
+
+      group.add( cube );
     
       cpuView.push(cube);
     }
@@ -85,9 +88,23 @@ function createCPUViews(coreCount){
     cpuViews.push(cpuView);
   }
 
+  group.rotation.x = 3 * (Math.PI / 4);
+  scene.add( group );
 }
 
+function updateCPUViews() {
+  for (let i = 0; i < cpuLoadQueues.length; i++){
+
+    for (let j = 0; j < cpuLoadQueues[i].length; j++){
+      cpuViews[i][j].scale.z = 0.2 + cpuLoadQueues[i][j]/20;
+    }
+  }  
+}
+
+
 window.electronAPI.handleCPU((event, value) => {
+  //debugger;
+
   if (!initialized){
     initialized = true;
 
@@ -96,11 +113,11 @@ window.electronAPI.handleCPU((event, value) => {
     const coreCount = value.cpus.length;
 
     createCPULoadQueue(coreCount);
-    createCPUViews(coreCount);
+    createCPUViews();
   }
 
   pushToCPULoadQueue(value);
-  
+  updateCPUViews();
     //counter.innerText = JSON.stringify(cpuLoadQueues, null, 2);
     //event.sender.send('counter-value', newValue)
 })
